@@ -155,7 +155,7 @@ const DateRangePicker = ({
   const calendarDays = generateDays();
 
   return (
-    <div className="absolute right-30 top-[-20px] mt-2 bg-white border border-gray-100 shadow-md rounded-2xl  w-[380px] z-[70] p-4 flex flex-col font-sans">
+    <div className="absolute right-0 top-full mt-2 bg-white border border-gray-100 shadow-xl rounded-2xl w-[380px] z-50 p-4 flex flex-col font-sans">
       {/* Header */}
       <div className="flex justify-between items-center mb-1">
         <div className="flex items-center gap-2 text-[#001552]">
@@ -216,13 +216,13 @@ const DateRangePicker = ({
               onClick={prevMonth}
               className="p-1 hover:bg-gray-100 rounded-full transition"
             >
-              <ChevronLeft size={16} className="stroke-[2]" />
+              <ChevronLeft size={16} className="stroke-2" />
             </button>
             <button
               onClick={nextMonth}
               className="p-1 hover:bg-gray-100 rounded-full transition"
             >
-              <ChevronRight size={16} className="stroke-[2]" />
+              <ChevronRight size={16} className="stroke-2" />
             </button>
           </div>
         </div>

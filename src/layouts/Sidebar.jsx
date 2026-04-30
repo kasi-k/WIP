@@ -1,21 +1,23 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Menus } from "../helperConfigData/helperData";
+import { Menus, SupportMenu } from "../helperConfigData/helperData";
 import { Menu } from "lucide-react";
-import { SupportMenu } from "../helperConfigData/helperData";
+
+const navClass = ({ isActive }) =>
+  `flex items-center gap-3 px-3 py-2 rounded-lg mb-2 transition-colors ${
+    isActive
+      ? "bg-active-bg text-select-blue border-r-4 border-select-blue"
+      : "text-grey hover:bg-active-bg"
+  }`;
+
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
 
   return (
     <div
-      className={`
-       flex flex-col justify-between 
-        transition-all duration-300
-        sticky top-20 left-0 h-[calc(100vh-75px)]
-        ${open ? "w-64" : "w-20"} 
-        md:w-64
-        p-3 md:p-4
-      `}
+      className={`flex flex-col justify-between transition-all duration-300 sticky top-20 left-0 h-[calc(100vh-75px)] p-3 md:p-4 ${
+        open ? "w-64" : "w-20"
+      } md:w-64`}
     >
       <div>
         <div className="mb-4 flex md:hidden">
@@ -24,32 +26,18 @@ const Sidebar = () => {
           </button>
         </div>
 
-        {Menus.map((item, index) => {
+        {Menus.map((item) => {
           const Icon = item.icon;
-
           return (
             <NavLink
-              key={index}
+              key={item.path}
               to={item.path}
-              end={item.path === "/"} 
+              end={item.path === "/dashboard"}
               onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg mb-2
-                ${
-                  isActive
-                    ? "bg-[#e2eefe] text-[#1E3A8A] border-r-4 border-[#1e3a8a]"
-                    : "text-gray-600 hover:bg-[#e2eefe]"
-                }`
-              }
+              className={navClass}
             >
               <Icon size={20} />
-
-              <span
-                className={`
-                  ${open ? "inline" : "hidden"}
-                  md:inline
-                `}
-              >
+              <span className={`${open ? "inline" : "hidden"} md:inline`}>
                 {item.name}
               </span>
             </NavLink>
@@ -58,31 +46,17 @@ const Sidebar = () => {
       </div>
 
       <div className="space-y-4 px-3 py-2">
-        {SupportMenu.map((item, index) => {
+        {SupportMenu.map((item) => {
           const Icon = item.icon;
-
           return (
             <NavLink
-              key={index}
+              key={item.path}
               to={item.path}
               onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg mb-2
-                ${
-                  isActive
-                    ? "bg-[#e2eefe] text-[#1E3A8A] border-r-4 border-[#1e3a8a]"
-                    : "text-gray-600 hover:bg-[#e2eefe]"
-                }`
-              }
+              className={navClass}
             >
               <Icon size={20} />
-
-              <span
-                className={`
-                  ${open ? "inline" : "hidden"}
-                  md:inline
-                `}
-              >
+              <span className={`${open ? "inline" : "hidden"} md:inline`}>
                 {item.name}
               </span>
             </NavLink>
@@ -92,4 +66,5 @@ const Sidebar = () => {
     </div>
   );
 };
+
 export default Sidebar;

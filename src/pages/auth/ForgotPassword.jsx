@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import HomePage from "../../assets/HomePage.png";
+import HomePage from "../../assets/images/HomePage.png";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -49,7 +49,7 @@ export default function ForgotPassword() {
           <img
             src={HomePage}
             alt="HomePage"
-            className="w-full h-full object-cover rounded-[2rem]"
+            className="w-full h-full object-cover rounded-4xl"
           />
         </div>
 
@@ -57,10 +57,10 @@ export default function ForgotPassword() {
         <div className="w-full md:w-1/2 flex flex-col justify-center px-8 sm:px-12 lg:px-16 py-8">
           <div className="w-full max-w-[380px] mx-auto">
             <div className="mb-10">
-              <h1 className="text-[32px] font-bold text-[#0f172a] tracking-tight mb-3">
+              <h1 className="text-[32px] font-bold text-textcolor tracking-tight mb-3">
                 Reset Password
               </h1>
-              <p className="text-[14px] text-[#64748b] leading-relaxed">
+              <p className="text-[14px] text-text-muted leading-relaxed">
                 Enter your email and we'll send you
                 <br className="hidden sm:block" />
                 a link to reset your password.
@@ -83,10 +83,10 @@ export default function ForgotPassword() {
                       if (error) setError("");
                     }}
                     placeholder="yourname@beyondliving.com"
-                    className={`bg-white border shadow-sm text-[#334155] text-[14px] rounded-full h-[48px] px-5 w-full focus:outline-none focus:ring-1 transition-all border-[#1e3a8a] border-x-3 border-y-0 placeholder-[#cbd5e1] ${
+                    className={`bg-white border shadow-sm text-[#334155] text-[14px] rounded-full h-[48px] px-5 w-full focus:outline-none focus:ring-1 transition-all border-select-blue border-x-3 border-y-0 placeholder-[#cbd5e1] ${
                       error
                         ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-[#1e3a8a] focus:border-[#1e3a8a] focus:ring-[#1e3a8a]"
+                        : "border-select-blue focus:border-select-blue focus:ring-select-blue"
                     }`}
                   />
                 </div>

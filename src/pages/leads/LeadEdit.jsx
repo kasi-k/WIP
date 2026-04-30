@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState,    } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { TableData } from "../../data/TableData";
-import avatar from "../../assets/avatar.png";
+import avatar from "../../assets/images/avatar.png";
 import EditInquiryform from "./EditInquiryform";
 import {
   FiEdit2,
@@ -22,7 +22,19 @@ import {
 const LeadEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [lead, setLead] = useState(null);
+  const [lead, setLead] = useState(() => {
+    const saved = localStorage.getItem("newLeadsData");
+    let newLeads = [];
+    if (saved) {
+      try {
+        newLeads = JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    const allLeads = [...TableData, ...newLeads];
+    return allLeads.find((item) => item.proposalId === id) || null;
+  });
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -70,20 +82,7 @@ const LeadEdit = () => {
     setLead(newLeadFormat);
   };
 
-  useEffect(() => {
-    const saved = localStorage.getItem("newLeadsData");
-    let newLeads = [];
-    if (saved) {
-      try {
-        newLeads = JSON.parse(saved);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    const allLeads = [...TableData, ...newLeads];
-    const foundLead = allLeads.find((item) => item.proposalId === id);
-    setLead(foundLead);
-  }, [id]);
+
 
   if (!lead) {
     return (
@@ -101,7 +100,7 @@ const LeadEdit = () => {
   if (currentStepIdx === -1) currentStepIdx = 0;
 
   return (
-    <div className="bg-[#f4f4f4] p-6 font-sans h-full overflow-y-scroll">
+    <div className="bg-overallbg p-6 font-sans h-full overflow-y-scroll">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -115,7 +114,7 @@ const LeadEdit = () => {
         <div className="flex gap-3">
           <button
             onClick={() => setIsEditFormOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-[#e2e8f0] cursor-pointer rounded-xl text-sm font-semibold text-[#1e293b] hover:bg-gray-50 shadow-sm transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-border cursor-pointer rounded-xl text-sm font-semibold text-[#1e293b] hover:bg-gray-50 shadow-sm transition-all"
           >
             <FiEdit2 size={16} /> Edit Inquiry
           </button>
@@ -326,9 +325,9 @@ const LeadEdit = () => {
               Timeline & Updates
             </h3>
 
-            <div className="relative pl-6 space-y-10 before:absolute before:inset-y-2 before:left-[11px] before:w-[2px] before:bg-[#e2e8f0]">
+            <div className="relative pl-6 space-y-10 before:absolute before:inset-y-2 before:left-[11px] before:w-[2px] before:bg-border">
               <div className="relative">
-                <div className="absolute -left-[35px] top-0 w-8 h-8 rounded-full bg-[#f0f9ff] border-[4px] border-white flex items-center justify-center text-blue-500 z-10 shadow-sm">
+                <div className="absolute -left-[35px] top-0 w-8 h-8 rounded-full bg-[#f0f9ff] border-4 border-white flex items-center justify-center text-blue-500 z-10 shadow-sm">
                   <FiFileText size={12} />
                 </div>
                 <div className="flex justify-between items-start mb-1.5">
@@ -344,7 +343,7 @@ const LeadEdit = () => {
                   suite have been uploaded to the documents section for your
                   review.
                 </p>
-                <div className="bg-[#f8fafc] border border-[#f1f5f9] p-3 rounded-xl flex items-center gap-3 w-fit">
+                <div className="bg-[#f8fafc] border border-bg-soft p-3 rounded-xl flex items-center gap-3 w-fit">
                   <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
                     <img src="https://i.pravatar.cc/100?img=11" alt="avatar" />
                   </div>
@@ -355,7 +354,7 @@ const LeadEdit = () => {
               </div>
 
               <div className="relative">
-                <div className="absolute -left-[35px] top-0 w-8 h-8 rounded-full bg-gray-100 border-[4px] border-white flex items-center justify-center text-gray-500 z-10 shadow-sm">
+                <div className="absolute -left-[35px] top-0 w-8 h-8 rounded-full bg-gray-100 border-4 border-white flex items-center justify-center text-gray-500 z-10 shadow-sm">
                   <FiCheck size={12} />
                 </div>
                 <div className="flex justify-between items-start mb-1.5">
@@ -373,7 +372,7 @@ const LeadEdit = () => {
               </div>
 
               <div className="relative">
-                <div className="absolute -left-[35px] top-0 w-8 h-8 rounded-full bg-gray-100 border-[4px] border-white flex items-center justify-center text-gray-500 z-10 shadow-sm">
+                <div className="absolute -left-[35px] top-0 w-8 h-8 rounded-full bg-gray-100 border-4 border-white flex items-center justify-center text-gray-500 z-10 shadow-sm">
                   <FiMapPin size={12} />
                 </div>
                 <div className="flex justify-between items-start mb-1.5">
@@ -414,14 +413,14 @@ const LeadEdit = () => {
               Lead Interior Designer
             </p>
 
-            <button className="w-full py-3 bg-white border-[1.5px] border-[#e2e8f0] hover:border-[#001552] hover:text-[#001552] text-[#334155] rounded-[14px] text-[14px] font-bold mb-3 flex items-center justify-center gap-2.5 transition-all shadow-sm">
+            <button className="w-full py-3 bg-white border-[1.5px] border-border hover:border-[#001552] hover:text-[#001552] text-[#334155] rounded-[14px] text-[14px] font-bold mb-3 flex items-center justify-center gap-2.5 transition-all shadow-sm">
               <FiPhone size={18} /> Schedule Call
             </button>
             <div className="w-full flex gap-3">
-              <button className="flex-1 py-3 bg-[#f8fafc] hover:bg-[#f1f5f9] text-[#475569] rounded-[14px] text-[13px] font-bold flex items-center justify-center gap-2 transition-colors border border-transparent hover:border-gray-200">
+              <button className="flex-1 py-3 bg-[#f8fafc] hover:bg-bg-soft text-grey rounded-[14px] text-[13px] font-bold flex items-center justify-center gap-2 transition-colors border border-transparent hover:border-gray-200">
                 <FiMessageCircle size={16} /> WhatsApp
               </button>
-              <button className="flex-1 py-3 bg-[#f8fafc] hover:bg-[#f1f5f9] text-[#475569] rounded-[14px] text-[13px] font-bold flex items-center justify-center gap-2 transition-colors border border-transparent hover:border-gray-200">
+              <button className="flex-1 py-3 bg-[#f8fafc] hover:bg-bg-soft text-grey rounded-[14px] text-[13px] font-bold flex items-center justify-center gap-2 transition-colors border border-transparent hover:border-gray-200">
                 <FiMail size={16} /> Email
               </button>
             </div>
@@ -440,7 +439,7 @@ const LeadEdit = () => {
 
             <div className="space-y-3.5">
               {/* Doc Item 1 */}
-              <div className="flex items-center justify-between p-3.5 border border-[#f1f5f9] rounded-[14px] hover:border-[#bae6fd] hover:bg-[#f8fafc] transition-all group">
+              <div className="flex items-center justify-between p-3.5 border border-bg-soft rounded-[14px] hover:border-[#bae6fd] hover:bg-[#f8fafc] transition-all group">
                 <div className="flex items-center gap-3.5">
                   <div className="w-10 h-10 bg-[#eff6ff] text-[#3b82f6] rounded-[10px] flex items-center justify-center shrink-0">
                     <FiFileText size={18} />
@@ -460,7 +459,7 @@ const LeadEdit = () => {
               </div>
 
               {/* Doc Item 2 */}
-              <div className="flex items-center justify-between p-3.5 border border-[#f1f5f9] rounded-[14px] hover:border-[#fed7aa] hover:bg-[#fff7ed] transition-all group">
+              <div className="flex items-center justify-between p-3.5 border border-bg-soft rounded-[14px] hover:border-[#fed7aa] hover:bg-[#fff7ed] transition-all group">
                 <div className="flex items-center gap-3.5">
                   <div className="w-10 h-10 bg-[#ffedd5] text-[#ea580c] rounded-[10px] flex items-center justify-center shrink-0">
                     <FiLayers size={18} />
@@ -480,7 +479,7 @@ const LeadEdit = () => {
               </div>
 
               {/* Doc Item 3 */}
-              <div className="flex items-center justify-between p-3.5 border border-[#f1f5f9] rounded-[14px] hover:border-[#e0e7ff] hover:bg-[#eef2ff] transition-all group">
+              <div className="flex items-center justify-between p-3.5 border border-bg-soft rounded-[14px] hover:border-[#e0e7ff] hover:bg-[#eef2ff] transition-all group">
                 <div className="flex items-center gap-3.5">
                   <div className="w-10 h-10 bg-[#e0e7ff] text-[#4f46e5] rounded-[10px] flex items-center justify-center shrink-0">
                     <FiEdit2 size={18} />
@@ -518,7 +517,7 @@ const LeadEdit = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-[2px] p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-[2px] p-4">
           <div className="bg-white rounded-[16px] font-manrope shadow-2xl w-full max-w-[400px] mx-auto p-6 text-center">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
               <FiTrash2 size={24} />
@@ -526,14 +525,14 @@ const LeadEdit = () => {
             <h2 className="text-[19px] font-bold text-[#1e293b] mb-2">
               Delete Inquiry
             </h2>
-            <p className="text-[#64748b] text-[14px] mb-6">
+            <p className="text-text-muted text-[14px] mb-6">
               Are you sure you want to delete this inquiry? This action cannot
               be undone.
             </p>
             <div className="flex gap-3 justify-center">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-5 py-2.5 rounded-[8px] bg-white border border-[#e2e8f0] text-[#64748b] text-[13px] font-bold hover:bg-gray-50 transition-all flex-1 cursor-pointer"
+                className="px-5 py-2.5 rounded-[8px] bg-white border border-border text-text-muted text-[13px] font-bold hover:bg-gray-50 transition-all flex-1 cursor-pointer"
               >
                 Cancel
               </button>

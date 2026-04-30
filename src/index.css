@@ -2,9 +2,24 @@
 
 @theme {
   --font-manrope: "Manrope", sans-serif;
-  --color-primary: #1a2b4d;
-  --color-secondary: #9ca3af;
-  --color-darkblue:"gradient-to-r from-[#1E3A8A] to-[#001552]";
-  
-}
 
+  /* Brand */
+  --color-primary: #1a2b4d;
+  --color-select-blue: #1e3a8a;
+
+  /* Backgrounds */
+  --color-overallbg: #f4f4f4;
+  --color-surface: #ffffff;
+  --color-bg-soft: #f1f5f9;
+  --color-active-bg: #e2eefe;
+
+  /* Borders */
+  --color-bordergray: #e2e8f0;
+
+  /* Text */
+  --color-textcolor: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-grey: #475569;
+  --color-secondary: #9ca3af;
+}

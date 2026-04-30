@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { HiMiniXMark } from "react-icons/hi2";
 import { GrLocation } from "react-icons/gr";
-import InputField from "../../components/forms/InputField";
+import InputField from "../../components/InputField";
 
 const INITIAL_FORM_STATE = {
   fullName: "",
@@ -182,16 +182,16 @@ function NewInquiriesform({ onClose, onAddLead }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-[2px] p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-[2px] p-4">
       <div className="bg-white rounded-[16px] font-manrope shadow-2xl w-full max-w-[660px] mx-auto">
         <form onSubmit={handleSubmit}>
           {/* Header */}
           <div className="flex justify-between items-start pt-6 px-8 pb-4">
             <div>
-              <h1 className="text-[19px] font-bold text-[#1e3a8a] tracking-tight">
+              <h1 className="text-[19px] font-bold text-select-bluetracking-tight">
                 Add Inquiry
               </h1>
-              <p className="text-[#94a3b8] text-[13px] mt-0.5">
+              <p className="text-text-subtle text-[13px] mt-0.5">
                 Enter client and project details
               </p>
             </div>
@@ -207,8 +207,8 @@ function NewInquiriesform({ onClose, onAddLead }) {
           <div className="px-8 pb-6">
             {/* Client Information */}
             <div className="mb-5">
-              <h2 className="text-[#1e3a8a] font-bold text-[13px] mb-3 flex items-center gap-2">
-                <span className="w-[3px] h-[14px] bg-[#1e3a8a] rounded-sm block"></span>
+              <h2 className="text-select-bluefont-bold text-[13px] mb-3 flex items-center gap-2">
+                <span className="w-[3px] h-[14px] bg-select-blue rounded-sm block"></span>
                 Client Information
               </h2>
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
@@ -221,8 +221,8 @@ function NewInquiriesform({ onClose, onAddLead }) {
 
             {/* Project Details */}
             <div className="mb-5">
-              <h2 className="text-[#1e3a8a] font-bold text-[13px] mb-3 flex items-center gap-2">
-                <span className="w-[3px] h-[14px] bg-[#1e3a8a] rounded-sm block"></span>
+              <h2 className="text-select-bluefont-bold text-[13px] mb-3 flex items-center gap-2">
+                <span className="w-[3px] h-[14px] bg-select-blue rounded-sm block"></span>
                 Project Details
               </h2>
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
@@ -232,8 +232,8 @@ function NewInquiriesform({ onClose, onAddLead }) {
 
             {/* Inquiry Status & Notes */}
             <div className="mb-2">
-              <h2 className="text-[#1e3a8a] font-bold text-[13px] mb-3 flex items-center gap-2">
-                <span className="w-[3px] h-[14px] bg-[#1e3a8a] rounded-sm block"></span>
+              <h2 className="text-select-bluefont-bold text-[13px] mb-3 flex items-center gap-2">
+                <span className="w-[3px] h-[14px] bg-select-blue rounded-sm block"></span>
                 Inquiry Status & Notes
               </h2>
               <div className="mb-3 mt-1">
@@ -252,8 +252,8 @@ function NewInquiriesform({ onClose, onAddLead }) {
                       }
                       className={`flex-1 py-1.5 rounded-[6px] text-[10px] font-semibold capitalize border transition-all ${
                         formData.inquiryStatus === status
-                          ? "bg-blue-50 border-[#1e3a8a] text-[#1e3a8a]"
-                          : "bg-white border-[#e2e8f0] text-gray-500 hover:bg-gray-50"
+                          ? "bg-blue-50 border-select-bluetext-[#1e3a8a]"
+                          : "bg-white border-bordergray text-gray-500 hover:bg-gray-50"
                       }`}
                     >
                       {status}
@@ -286,13 +286,13 @@ function NewInquiriesform({ onClose, onAddLead }) {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="text-[#64748b] text-[13px] font-medium hover:text-[#1e293b] transition-colors"
+                className="text-text-muted text-[13px] font-medium hover:text-[#1e293b] transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-[8px] bg-[#1e3a8a] text-white text-[13px] font-medium hover:bg-[#001552] shadow-sm transition-all flex items-center justify-center min-w-[140px]"
+                className="px-6 py-2.5 rounded-[8px] bg-select-bluetext-white text-[13px] font-medium hover:bg-[#001552] shadow-sm transition-all flex items-center justify-center min-w-[140px]"
               >
                 Create Inquiry
               </button>

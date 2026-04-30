@@ -8,7 +8,7 @@ import { VscError } from "react-icons/vsc";
 
 const Dashboard = () => {
   return (
-    <div className="h-full overflow-y-scroll">
+    <div className="h-full overflow-y-auto">
       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="bg-white h-30 w-40 rounded-3xl shadow-md relative ml-4 border-t-6 border-green-400 ">
           <p className="absolute top-[-4px] left-12 p-1 rounded-lg text-xs bg-green-400 text-white ">
@@ -126,7 +126,7 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="grid mt-3 bg-white p-6 rounded-3xl shadow-md   ">
-        <p className="mb-3 text-[#1A2B4D] font-semibold">
+        <p className="mb-3 text-primary font-semibold">
           Active Lead Pipeline
         </p>
         <div className=" bg-white grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 relative">
@@ -143,12 +143,12 @@ const Dashboard = () => {
           <div className="relative w-35 h-30 rounded-3xl">
             <MdOutlineCall
               size={50}
-              className="bg-[#1A2B4D] absolute top-3 left-10 text-white rounded-full p-1.5 border-3 shadow-md "
+              className="bg-primary absolute top-3 left-10 text-white rounded-full p-1.5 border-3 shadow-md "
             />
             <span className="absolute top-16 left-9 text-[#7f7f7f]">
               Contacted
             </span>
-            <span className="absolute top-22 left-10 text-[#1a2b4d] font-semibold">
+            <span className="absolute top-22 left-10 text-primary font-semibold">
               18 Leads
             </span>
           </div>
