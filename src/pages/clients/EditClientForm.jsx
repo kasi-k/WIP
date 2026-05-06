@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { HiMiniXMark } from "react-icons/hi2";
 import { GrLocation } from "react-icons/gr";
+import { Loader2 } from "lucide-react";
 import InputField from "../../components/InputField";
+import Modal from "../../components/Modal";
 
 const INITIAL_FORM_STATE = {
   clientName: "",
@@ -13,76 +14,43 @@ const INITIAL_FORM_STATE = {
   paymentStatus: "",
 };
 
-const paymentStatuses = ["completed", "pending", "failed", "cancelled"];
+const paymentStatuses = ["Completed", "Pending", "Unfulfilled"];
 
 const propertyTypes = [
-  "Luxury Villa",
-  "Apartment",
-  "Penthouse",
-  "Independent House",
-  "Duplex",
-  "Studio Apartment",
-  "Farm House",
-  "Beach House",
+  "Luxury Villa", "Apartment", "Penthouse", "Independent House",
+  "Duplex", "Studio Apartment", "Farm House", "Beach House",
 ];
 
 const FIELD_CONFIG = {
   clientInfo: [
+    { name: "clientName", label: "Client Name", type: "text", placeholder: "Full name", required: true },
     {
-      name: "clientName",
-      label: "Client Name",
-      type: "text",
-      placeholder: "Full Name",
+      name: "clientPhone", label: "Phone Number", type: "tel", placeholder: "10-digit number",
       required: true,
+      validation: (val) => !/^\d{10}$/.test(val.replace(/\s/g, "")) ? "Must be a 10-digit number" : null,
     },
     {
-      name: "clientPhone",
-      label: "Client Phone",
-      type: "tel",
-      placeholder: "Phone Number",
+      name: "clientEmail", label: "Email Address", type: "email", placeholder: "example@domain.com",
       required: true,
       validation: (val) =>
-        !/^\d{10}$/.test(val.trim()) ? "Phone Number must be 10 digits" : null,
-    },
-    {
-      name: "clientEmail",
-      label: "Client Email",
-      type: "email",
-      placeholder: "example@gmail.com",
-      required: true,
-      validation: (val) =>
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim())
-          ? "Enter a valid email address"
-          : null,
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim()) ? "Enter a valid email address" : null,
     },
   ],
   propertyDetails: [
-    {
-      name: "location",
-      label: "Property Type",
-      type: "select",
-      options: propertyTypes,
-      required: true,
-    },
-    {
-      name: "locationSecondary",
-      label: "City / Location",
-      type: "text",
-      placeholder: "e.g. Beverly Hills, CA",
-      icon: GrLocation,
-      required: true,
-    },
-    {
-      name: "budget",
-      label: "Budget",
-      type: "text",
-      placeholder: "e.g. ₹60-70L",
-      required: true,
-    },
+    { name: "location", label: "Property Type", type: "select", options: propertyTypes, required: true },
+    { name: "locationSecondary", label: "City / Location", type: "text", placeholder: "e.g. Beverly Hills, CA", icon: GrLocation, required: true },
+    { name: "budget", label: "Budget", type: "text", placeholder: "e.g. ₹60 – 70L", required: true },
   ],
 };
 
-function EditClientForm({ initialData, onClose, onSave }) {
+const SectionHeader = ({ children }) => (
+  <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-select-blue mb-4">
+    <span className="w-0.5 h-3.5 bg-select-blue rounded-full shrink-0" />
+    {children}
+  </h2>
+);
+
+function EditClientForm({ initialData, onClose, onSave, hasMilestones = false }) {
   const [formData, setFormData] = useState(() => {
     if (initialData) {
       return {
@@ -98,178 +66,163 @@ function EditClientForm({ initialData, onClose, onSave }) {
     return INITIAL_FORM_STATE;
   });
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  const handleCancel = () => {
-    if (onClose) onClose();
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const validate = () => {
-    let newErrors = {};
+    const newErrors = {};
     const allFields = [
       ...FIELD_CONFIG.clientInfo,
       ...FIELD_CONFIG.propertyDetails,
       { name: "paymentStatus", label: "Payment Status", required: true },
     ];
-
-    allFields.forEach((field) => {
-      const val = formData[field.name];
-      if (field.required && (!val || !val.toString().trim())) {
-        newErrors[field.name] = `${field.label} is required`;
-      } else if (field.validation) {
-        const errorMsg = field.validation(val);
-        if (errorMsg) newErrors[field.name] = errorMsg;
+    allFields.forEach((f) => {
+      const val = formData[f.name];
+      if (f.required && (!val || !val.toString().trim())) {
+        newErrors[f.name] = `${f.label} is required`;
+      } else if (f.validation) {
+        const msg = f.validation(val);
+        if (msg) newErrors[f.name] = msg;
       }
     });
-
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-    } else {
-      if (onSave) {
-        onSave(formData);
-      }
-      if (onClose) onClose();
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await onSave?.(formData);
+      onClose?.();
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const renderField = (field) => (
+  const field = (cfg) => (
     <InputField
-      key={field.name}
-      name={field.name}
-      label={field.label}
-      type={field.type}
-      value={formData[field.name]}
-      onChange={handleInputChange}
-      error={errors[field.name]}
-      placeholder={field.placeholder}
-      options={field.options}
-      icon={field.icon}
+      key={cfg.name}
+      name={cfg.name}
+      label={cfg.label}
+      type={cfg.type}
+      value={formData[cfg.name]}
+      onChange={handleChange}
+      error={errors[cfg.name]}
+      placeholder={cfg.placeholder}
+      options={cfg.options}
+      icon={cfg.icon}
     />
   );
 
-  return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-[2px] p-4">
-      <div className="bg-white rounded-[16px] font-manrope shadow-2xl w-full max-w-[660px] mx-auto">
-        <form onSubmit={handleSubmit}>
-
-          {/* Header */}
-          <div className="flex justify-between items-start pt-6 px-8 pb-4">
-            <div>
-              <h1 className="text-[19px] font-bold text-select-blue tracking-tight">
-                Edit Client
-              </h1>
-              <p className="text-text-subtle text-[13px] mt-0.5">
-                Update client and property details
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors mt-1"
-            >
-              <HiMiniXMark size={22} />
-            </button>
-          </div>
-
-          <div className="px-8 pb-6">
-
-            {/* Client Information */}
-            <div className="mb-5">
-              <h2 className="text-select-blue font-bold text-[13px] mb-3 flex items-center gap-2">
-                <span className="w-[3px] h-[14px] bg-select-blue rounded-sm block"></span>
-                Client Information
-              </h2>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                {FIELD_CONFIG.clientInfo.slice(0, 2).map(renderField)}
-              </div>
-              <div className="mt-3">
-                {renderField(FIELD_CONFIG.clientInfo[2])}
-              </div>
-            </div>
-
-            {/* Property Details */}
-            <div className="mb-5">
-              <h2 className="text-select-blue font-bold text-[13px] mb-3 flex items-center gap-2">
-                <span className="w-[3px] h-[14px] bg-select-blue rounded-sm block"></span>
-                Property Details
-              </h2>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                {FIELD_CONFIG.propertyDetails.map(renderField)}
-              </div>
-            </div>
-
-            {/* Payment Status */}
-            <div className="mb-2">
-              <h2 className="text-select-blue font-bold text-[13px] mb-3 flex items-center gap-2">
-                <span className="w-[3px] h-[14px] bg-select-blue rounded-sm block"></span>
-                Payment Status
-              </h2>
-              <div className="mb-3 mt-1">
-                <label className="text-[11px] font-semibold text-[#1e293b] mb-1.5 block">
-                  Current Status
-                </label>
-                <div className="flex gap-2 w-full justify-between">
-                  {paymentStatuses.map((status, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() =>
-                        handleInputChange({
-                          target: { name: "paymentStatus", value: status },
-                        })
-                      }
-                      className={`flex-1 py-1.5 rounded-[6px] text-[10px] font-semibold capitalize border transition-all ${
-                        formData.paymentStatus === status
-                          ? "bg-blue-50 border-select-blue text-select-blue"
-                          : "bg-white border-border text-gray-500 hover:bg-gray-50"
-                      }`}
-                    >
-                      {status}
-                    </button>
-                  ))}
-                </div>
-                {errors.paymentStatus && (
-                  <p className="text-red-500 text-[10px] mt-1">
-                    {errors.paymentStatus}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-end items-center gap-6 mt-6">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="text-text-muted text-[13px] font-medium hover:text-[#1e293b] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-6 py-2.5 rounded-[8px] bg-select-blue text-white text-[13px] font-medium hover:bg-[#001552] shadow-sm transition-all flex items-center justify-center min-w-[140px]"
-              >
-                Save Changes
-              </button>
-            </div>
-
-          </div>
-        </form>
-      </div>
+  const footer = (
+    <div className="flex justify-end items-center gap-4">
+      <button
+        type="button"
+        onClick={onClose}
+        disabled={isSubmitting}
+        className="px-5 py-2.5 rounded-lg border border-border text-sm font-medium text-text-muted hover:bg-bg-soft transition-all disabled:opacity-50"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="edit-client-form"
+        disabled={isSubmitting}
+        className="min-w-[140px] flex items-center justify-center gap-2 px-7 py-2.5 rounded-lg bg-select-blue text-white text-sm font-medium hover:bg-primary shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 size={14} className="animate-spin" />
+            Saving…
+          </>
+        ) : "Save Changes"}
+      </button>
     </div>
+  );
+
+  return (
+    <Modal
+      title="Edit Client"
+      subtitle="Update client and property details"
+      onClose={isSubmitting ? undefined : onClose}
+      footer={footer}
+    >
+      <form id="edit-client-form" onSubmit={handleSubmit} noValidate>
+
+        <div className="mb-6">
+          <SectionHeader>Client Information</SectionHeader>
+          <div className="grid grid-cols-2 gap-4">
+            {FIELD_CONFIG.clientInfo.slice(0, 2).map(field)}
+          </div>
+          <div className="mt-4">{field(FIELD_CONFIG.clientInfo[2])}</div>
+        </div>
+
+        <div className="border-t border-border mb-6" />
+
+        <div className="mb-6">
+          <SectionHeader>Property Details</SectionHeader>
+          <div className="grid grid-cols-2 gap-4">
+            {FIELD_CONFIG.propertyDetails.map(field)}
+          </div>
+        </div>
+
+        <div className="border-t border-border mb-6" />
+
+        <div>
+          <SectionHeader>Payment Status</SectionHeader>
+          {hasMilestones ? (
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-bg-soft border border-border">
+              <div>
+                <p className="text-[12px] font-semibold text-text-muted">Auto-managed by payment milestones</p>
+                <p className="text-[11px] text-text-subtle mt-0.5">Status updates automatically as milestones are marked paid.</p>
+              </div>
+              <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                formData.paymentStatus?.toLowerCase() === "completed" ? "bg-green-50 text-green-700 border-green-200" :
+                formData.paymentStatus?.toLowerCase() === "pending"   ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
+                formData.paymentStatus?.toLowerCase() === "failed"    ? "bg-red-50 text-red-600 border-red-200" :
+                "bg-gray-50 text-gray-500 border-gray-200"
+              }`}>
+                {formData.paymentStatus || "Pending"}
+              </span>
+            </div>
+          ) : (
+            <div>
+              <p className="text-[13px] font-medium text-text mb-2">Current Status</p>
+              <div className="flex gap-2">
+                {paymentStatuses.map((status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => handleChange({ target: { name: "paymentStatus", value: status } })}
+                    className={`flex-1 py-2 rounded-lg text-xs font-medium capitalize border transition-all ${
+                      formData.paymentStatus === status
+                        ? "bg-active-bg border-select-blue text-select-blue"
+                        : "bg-white border-border text-text-muted hover:bg-bg-soft"
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+              {errors.paymentStatus && (
+                <p className="text-red-500 text-[11px] mt-1">{errors.paymentStatus}</p>
+              )}
+            </div>
+          )}
+        </div>
+
+      </form>
+    </Modal>
   );
 }
 

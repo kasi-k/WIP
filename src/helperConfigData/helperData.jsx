@@ -1,20 +1,18 @@
 import { MdOutlineDashboard } from "react-icons/md";
 import { HiOutlineUsers } from "react-icons/hi";
-import { PiSuitcaseSimpleBold } from "react-icons/pi";
+import { PiSuitcaseSimpleBold, PiBriefcaseDuotone } from "react-icons/pi";
 import { MdOutlineAnalytics } from "react-icons/md";
-import { FaRegFileLines } from "react-icons/fa6";
+import { FaRegFileLines, FaRegHandshake } from "react-icons/fa6";
 import { TbDeviceDesktopAnalytics } from "react-icons/tb";
 import { MdOutlineContactSupport } from "react-icons/md";
 import { PiSignOut } from "react-icons/pi";
-import { TbCalendarDue } from "react-icons/tb";
-import { HiMiniArrowsUpDown } from "react-icons/hi2";
-import { TbFilter } from "react-icons/tb";
-import { TbFileExport } from "react-icons/tb";
 
 export const Menus = [
     { name: "Dashboard", icon: MdOutlineDashboard, path: "/dashboard" },
     { name: "Leads", icon: HiOutlineUsers, path: "/leads" },
+    { name: "Projects", icon: PiBriefcaseDuotone, path: "/projects" },
     {name:"Client", icon:HiOutlineUsers,path:"/clients"},
+    {name:"Deals", icon:FaRegHandshake,path:"/deals"},
     { name: "Accounts", icon: PiSuitcaseSimpleBold, path: "/accounts" },
     { name: "Pipeline", icon:  TbDeviceDesktopAnalytics, path: "/pipeline" },
     { name: "Analytics", icon: MdOutlineAnalytics, path: "/analytics" },
@@ -26,9 +24,15 @@ export const SupportMenu = [
     { name: "Sign Out", icon: PiSignOut, path: "/signout" },
 ];
 
-export const LeadsHeader = [
-    { name: "Date Range", icon: <TbCalendarDue size={23}/> },
-    { name: "Sort", icon: <HiMiniArrowsUpDown size={23}/> },
-    { name: "Filter", icon: <TbFilter size={23}/> },
-    { name: "Export", icon: <TbFileExport size={23}/> },
+
+// Property types — shared between lead capture (dropdown) and conversion (read-only mapping)
+export const PROPERTY_TYPES = [
+    "Luxury Villa",
+    "Apartment",
+    "Penthouse",
+    "Independent House",
+    "Duplex",
+    "Studio Apartment",
+    "Farm House",
+    "Beach House",
 ];

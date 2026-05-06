@@ -4,27 +4,59 @@ import { TableData } from "../../data/TableData";
 import NewInquiriesform from "./NewInquiriesform";
 import Table from "../../components/Table";
 import { useNavigate } from "react-router-dom";
-// import ProjectCaliberView from "./ProjectCaliberView"; ← your other file
+import { getBadgeClass } from "../../data/LeadStatusConfig";
 
-// ─── Tab config ────────────────────────────────────────────────────────────────
-// When real APIs are ready replace each value with the endpoint URL:
-//   "0-0": "/api/leads/new-inquiries"
-//   "0-1": "/api/leads/nurturing"
-//   "0-2": "/api/leads/dropped"
-//   "1-0": "/api/project-caliber/active"  ...etc
-const MAIN_TABS = ["Inquiries", "Project Caliber"];
+const MAIN_TABS = ["Inquiries"];
 
-const SUB_TABS = { 
-  0: ["New Inquiries", "Nurturing Inquiries", "Dropped Inquiries"],
-  1: ["Tab A", "Tab B", "Tab C"], // replace with real Project Caliber sub-tabs
+const SUB_TABS = {
+  0: ["New Inquiries", "Nurturing Inquiries", "Won Deals", "Dropped Inquiries"],
+  1: ["Tab A", "Tab B", "Tab C"],
 };
 
-// ─── Mock fetch (delete this when real API is wired up) ───────────────────────
+// Sub-tab → status mapping. Mirrors the standard pipeline: raw inquiries,
+// active deals being worked, closed-won (incl. converted), and lost/dropped.
 const MOCK_STATUSES = {
-  "0-0": ["Proposal"],
-  "0-1": ["Qualified"],
-  "0-2": ["On Hold", "Pending"],
+  "0-0": ["Inquiry"],
+  "0-1": ["Qualified", "Proposal", "Negotiation", "On Hold"],
+  "0-2": ["Won", "Converted"],
+  "0-3": ["Lost"],
 };
+
+/**
+ * Build the full leads list by merging:
+ *   1. localStorage "newLeadsData" (added / edited leads) — prepended first
+ *   2. Static TableData — only items NOT overridden in localStorage
+ * Then remove any IDs found in "deletedLeads".
+ */
+function getMergedLeads() {
+  let newLeads = [];
+  try {
+    const raw = localStorage.getItem("newLeadsData");
+    if (raw) newLeads = JSON.parse(raw);
+  } catch (e) {
+    console.error(e);
+  }
+
+  let deletedLeads = [];
+  try {
+    const raw = localStorage.getItem("deletedLeads");
+    if (raw) deletedLeads = JSON.parse(raw);
+  } catch (e) {
+    console.error(e);
+  }
+
+  // Build a Set of proposalIds already present in localStorage leads
+  const overriddenIds = new Set(newLeads.map((l) => l.proposalId));
+
+  // Merge: localStorage leads first, then remaining static data
+  const merged = [
+    ...newLeads,
+    ...TableData.filter((item) => !overriddenIds.has(item.proposalId)),
+  ];
+
+  // Remove deleted leads
+  return merged.filter((item) => !deletedLeads.includes(item.proposalId));
+}
 
 async function fetchTabData(mainTab, subTab) {
   // ── Real API call goes here ──────────────────────────────────────────────────
@@ -33,9 +65,11 @@ async function fetchTabData(mainTab, subTab) {
   // return res.json();
   // ────────────────────────────────────────────────────────────────────────────
 
-  // Mock: filter static data by tab
+  // Mock: filter merged data by tab statuses
   const statuses = MOCK_STATUSES[`${mainTab}-${subTab}`] ?? [];
-  return TableData
+  const allLeads = getMergedLeads();
+
+  return allLeads
     .filter((item) =>
       statuses.some((s) => item.status?.toLowerCase() === s.toLowerCase()),
     )
@@ -50,6 +84,18 @@ const Leads = () => {
   const [activeSubTab, setActiveSubTab] = useState(0);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const result = await fetchTabData(activeMainTab, activeSubTab);
+      setData(result);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -70,24 +116,55 @@ const Leads = () => {
     return () => controller.abort();
   }, [activeMainTab, activeSubTab]);
 
+  // Re-load data when returning to the page (e.g. after edit/delete on profile)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadData();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [activeMainTab, activeSubTab]);
+
+  // Listen for custom events dispatched from the profile page
+  useEffect(() => {
+    const handleLeadUpdate = () => {
+      loadData();
+    };
+    window.addEventListener("leadDataChanged", handleLeadUpdate);
+    return () =>
+      window.removeEventListener("leadDataChanged", handleLeadUpdate);
+  }, [activeMainTab, activeSubTab]);
+
   // When a new lead is added, POST to API then re-fetch the current tab
+  // AFTER
   const handleAddLead = async (formData) => {
+    const nextNum =
+      TableData.length +
+      JSON.parse(localStorage.getItem("newLeadsData") || "[]").length +
+      1;
+    const proposalId = `BL-${new Date().getFullYear()}-${String(nextNum).padStart(3, "0")}`;
+
     const newLead = {
-      proposalId: `BL-2024-${Date.now()}`,
+      proposalId,
       clientName: formData.fullName,
       phone: formData.phoneNumber,
+      email: formData.email,
+      // "scope" is what the table column key reads — must match
       scope: formData.projectScope,
-      location: formData.location?.split(",")[0]?.trim() || "Unknown",
-      locationSecondary: formData.location?.split(",").slice(1).join(",").trim() || "Unknown",
-      status: formData.inquiryStatus || "Proposal",
+      location: formData.location?.trim() || "",
+      locationSecondary: "",
+      status: formData.inquiryStatus || "Inquiry",
       investment: formData.investmentRange,
       possessionDate: formData.processionDate
         ? formData.processionDate.split("-").reverse().join(".")
-        : "01.01.2025",
+        : "",
+      // All editable fields stored with consistent keys
+      buildUpArea: formData.buildUpArea,
+      propertyType: formData.propertyType,
+      architecturalNotes: formData.architecturalNotes,
+      inquirySource: formData.inquirySource,
     };
 
-    // Real API: await fetch("/api/leads", { method: "POST", body: JSON.stringify(newLead) });
-    // Mock: write to localStorage, then reload tab data
     const saved = JSON.parse(localStorage.getItem("newLeadsData") || "[]");
     localStorage.setItem("newLeadsData", JSON.stringify([newLead, ...saved]));
 
@@ -97,8 +174,36 @@ const Leads = () => {
 
   const columns = [
     { key: "sno", label: "Sno" },
-    { key: "proposalId", label: "Proposal ID" },
-    { key: "clientName", label: "Client Name" },
+    {
+      key: "proposalId",
+      label: "Proposal ID",
+      render: (_, item) => (
+        <span
+          className=" cursor-pointer hover:underline"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/leads/${item.proposalId}`);
+          }}
+        >
+          {item.proposalId}
+        </span>
+      ),
+    },
+    {
+      key: "clientName",
+      label: "Client Name",
+      render: (_, item) => (
+        <span
+          className="cursor-pointer hover:underline"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/leads/${item.proposalId}`);
+          }}
+        >
+          {item.clientName}
+        </span>
+      ),
+    },
     { key: "phone", label: "Phone" },
     { key: "scope", label: "Scope" },
     {
@@ -118,16 +223,7 @@ const Leads = () => {
       label: "Status",
       render: (_, item) => (
         <span
-          className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase ${
-            item.status?.toLowerCase() === "proposal"
-              ? "bg-[#e0f0ff] text-[#3b82f6]"
-              : item.status?.toLowerCase() === "qualified"
-                ? "bg-[#dcfce7] text-[#16a34a]"
-                : item.status?.toLowerCase() === "on hold" ||
-                    item.status?.toLowerCase() === "pending"
-                  ? "bg-[#fee2e2] text-[#ef4444]"
-                  : "bg-gray-100 text-gray-500"
-          }`}
+          className={`px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase ${getBadgeClass(item.status)}`}
         >
           {item.status}
         </span>
@@ -149,7 +245,10 @@ const Leads = () => {
         title="Leads"
         subtitle={subtitle}
         mainTabs={MAIN_TABS}
-        onMainTabChange={(idx) => { setActiveMainTab(idx); setActiveSubTab(0); }}
+        onMainTabChange={(idx) => {
+          setActiveMainTab(idx);
+          setActiveSubTab(0);
+        }}
         actions={
           isInquiries && (
             <button
@@ -165,47 +264,91 @@ const Leads = () => {
         data={isInquiries ? data : []}
         emptyMessage={
           isInquiries
-            ? loading ? "Loading..." : "No records found."
+            ? loading
+              ? "Loading..."
+              : "No records found."
             : "Project Caliber view — replace this with your component"
         }
         rowsPerPage={8}
-        onRowClick={isInquiries ? (item) => navigate(`/leads/${item.proposalId}`) : undefined}
         activeRowKey="proposalId"
         subTabs={isInquiries ? SUB_TABS[0] : undefined}
         onSubTabChange={setActiveSubTab}
-        sortFields={isInquiries ? [
-          { key: "proposalId", label: "Proposal ID" },
-          { key: "clientName", label: "Client Name" },
-          { key: "investment", label: "Investment" },
-          { key: "possessionDate", label: "Possession Date" },
-        ] : undefined}
-        filterFields={isInquiries ? [
-          { key: "status", label: "Status", options: ["Proposal", "Qualified", "Pending", "On Hold"] },
-          { key: "scope", label: "Scope", options: ["Interior", "Architecture"] },
-        ] : undefined}
-        dateRangeField={isInquiries ? {
-          key: "possessionDate",
-          parse: (value) => {
-            const parts = value?.split(".");
-            if (parts?.length === 3)
-              return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-            return null;
-          },
-        } : undefined}
-        exportConfig={isInquiries ? {
-          filename: "leads_export",
-          columns: [
-            { label: "Sno", key: "sno" },
-            { label: "Proposal ID", key: "proposalId" },
-            { label: "Client Name", key: "clientName" },
-            { label: "Phone", key: "phone" },
-            { label: "Scope", key: "scope" },
-            { label: "Location", render: (item) => `${item.location} - ${item.locationSecondary}` },
-            { label: "Status", key: "status" },
-            { label: "Investment", key: "investment" },
-            { label: "Possession Date", key: "possessionDate" },
-          ],
-        } : undefined}
+        sortFields={
+          isInquiries
+            ? [
+                { key: "proposalId", label: "Proposal ID" },
+                { key: "clientName", label: "Client Name" },
+                { key: "investment", label: "Investment" },
+                { key: "possessionDate", label: "Possession Date" },
+              ]
+            : undefined
+        }
+        filterFields={
+          isInquiries
+            ? [
+                {
+                  key: "status",
+                  label: "Status",
+                  options: [
+                    "Inquiry",
+                    "Qualified",
+                    "Proposal",
+                    "Negotiation",
+                    "Won",
+                    "Converted",
+                    "On Hold",
+                    "Lost",
+                  ],
+                },
+                {
+                  key: "scope",
+                  label: "Scope",
+                  options: [
+                    "Interior",
+                    "Architecture",
+                    "Full Home Interior",
+                    "On Hold",
+                    "Pending",
+                  ],
+                },
+              ]
+            : undefined
+        }
+        dateRangeField={
+          isInquiries
+            ? {
+                key: "possessionDate",
+                parse: (value) => {
+                  const parts = value?.split(".");
+                  if (parts?.length === 3)
+                    return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                  return null;
+                },
+              }
+            : undefined
+        }
+        exportConfig={
+          isInquiries
+            ? {
+                filename: "leads_export",
+                columns: [
+                  { label: "Sno", key: "sno" },
+                  { label: "Proposal ID", key: "proposalId" },
+                  { label: "Client Name", key: "clientName" },
+                  { label: "Phone", key: "phone" },
+                  { label: "Scope", key: "scope" },
+                  {
+                    label: "Location",
+                    render: (item) =>
+                      `${item.location} - ${item.locationSecondary}`,
+                  },
+                  { label: "Status", key: "status" },
+                  { label: "Investment", key: "investment" },
+                  { label: "Possession Date", key: "possessionDate" },
+                ],
+              }
+            : undefined
+        }
       />
 
       {showForm && (

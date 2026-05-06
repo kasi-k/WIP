@@ -110,7 +110,7 @@ export default function ForgotPassword() {
               {/* Back Button */}
               <button
                 type="button"
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/")}
                 className="w-full h-[48px] rounded-full border border-[#cbd5e1] bg-white text-[#334155] font-semibold text-[14px] hover:bg-gray-50 transition-all flex items-center justify-center"
               >
                 ← Back to Login

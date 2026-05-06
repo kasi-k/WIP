@@ -13,6 +13,9 @@ import Analytics from "../pages/Analytics";
 import Reports from "../pages/Reports";
 import Support from "../pages/Support";
 import Signout from "../pages/Signout";
+import Deals from "../pages/deals/Deals";
+import Projects from "../pages/projects/Projects";
+import ProjectDetail from "../pages/projects/ProjectDetail";
 
 const AppRoutes = () => {
   return (
@@ -29,6 +32,11 @@ const AppRoutes = () => {
           <Route index element={<Client />} />
           <Route path=":id" element={<ClientProfile />} />
         </Route>
+        <Route path="projects">
+          <Route index element={<Projects />} />
+          <Route path=":id" element={<ProjectDetail />} />
+        </Route>
+          <Route path="deals" element={<Deals/>} />
         <Route path="accounts" element={<Accounts />} />
         <Route path="pipeline" element={<Pipeline />} />
         <Route path="analytics" element={<Analytics />} />

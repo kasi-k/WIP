@@ -5,28 +5,44 @@ import AddClientForm from "./Addclientform";
 import Table from "../../components/Table";
 import { useNavigate } from "react-router-dom";
 
+const MAIN_TABS = ["Clients"];
+
+const SUB_TABS = {
+  0: ["All", "Completed", "Pending", "Unfullfilled"],
+};
+
+// null means no filter (show all)
+const SUB_TAB_STATUS = {
+  "0-0": null,
+  "0-1": "completed",
+  "0-2": "pending",
+  "0-3": "unfulfilled",
+};
+
 const Client = () => {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+  const [activeMainTab, setActiveMainTab] = useState(0);
+  const [activeSubTab, setActiveSubTab] = useState(0);
 
   const [newClients, setNewClients] = useState(() => {
-    const saved = localStorage.getItem("newClientsData");
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return [];
-      }
+    try {
+      return JSON.parse(localStorage.getItem("newClientsData") || "[]");
+    } catch {
+      return [];
     }
-    return [];
   });
 
   const [deletedClients] = useState(() => {
-    const saved = localStorage.getItem("deletedClients");
-    return saved ? JSON.parse(saved) : [];
+    try {
+      return JSON.parse(localStorage.getItem("deletedClients") || "[]");
+    } catch {
+      return [];
+    }
   });
 
-  const tableData = useMemo(() => {
+  // Full merged dataset (new + static, minus deleted)
+  const allClients = useMemo(() => {
     const baseData = [...ClientTableData];
     const trulyNew = [];
 
@@ -39,19 +55,39 @@ const Client = () => {
       }
     });
 
-    return [...trulyNew, ...baseData]
-      .filter((item) => !deletedClients.includes(item.clientID))
-      .map((item, index) => ({
-        ...item,
-        sno: String(index + 1).padStart(2, "0"),
-      }));
+    return [...trulyNew, ...baseData].filter(
+      (item) => !deletedClients.includes(item.clientID),
+    );
   }, [newClients, deletedClients]);
 
-  const handleAddClient = (newClientData) => {
-    const newIdNum = tableData.length + 1;
-    const clientID = `BL-2024-${newIdNum.toString().padStart(3, "0")}`;
+  // Apply sub-tab filter + renumber sno
+  const tableData = useMemo(() => {
+    const filterStatus = SUB_TAB_STATUS[`${activeMainTab}-${activeSubTab}`];
+    const filtered = filterStatus
+      ? allClients.filter(
+          (c) => c.paymentStatus?.toLowerCase() === filterStatus,
+        )
+      : allClients;
+    return filtered.map((item, index) => ({
+      ...item,
+      sno: String(index + 1).padStart(2, "0"),
+    }));
+  }, [allClients, activeMainTab, activeSubTab]);
+
+  const handleAddClient = async (newClientData) => {
+    // Simulate network latency — remove when real API is wired
+    await new Promise((r) => setTimeout(r, 700));
+
+    const maxStaticId = ClientTableData.reduce((max, c) => {
+      const n = parseInt(c.clientID.split("-").pop(), 10);
+      return n > max ? n : max;
+    }, 0);
+    const nextNum = maxStaticId + newClients.length + 1;
+    const clientID = `BL-2024-${String(nextNum).padStart(3, "0")}`;
+    const today = new Date();
+    const joinDate = `${String(today.getDate()).padStart(2, "0")}.${String(today.getMonth() + 1).padStart(2, "0")}.${today.getFullYear()}`;
     const newClient = {
-      sno: newIdNum,
+      sno: nextNum,
       clientID,
       clientName: newClientData.clientName,
       clientPhone: newClientData.clientPhone,
@@ -60,6 +96,7 @@ const Client = () => {
       locationSecondary: newClientData.locationSecondary,
       budget: newClientData.budget,
       paymentStatus: newClientData.paymentStatus,
+      joinDate,
     };
     const updated = [newClient, ...newClients];
     setNewClients(updated);
@@ -91,16 +128,15 @@ const Client = () => {
       render: (_, item) => {
         const statusStyles = {
           completed: "bg-green-100 text-green-700",
-          pending: "bg-yellow-100 text-yellow-700",
-          failed: "bg-red-100 text-red-600",
+          pending:   "bg-yellow-100 text-yellow-700",
+          failed:    "bg-red-100 text-red-600",
+          cancelled: "bg-gray-100 text-gray-500",
         };
         const style =
           statusStyles[item.paymentStatus?.toLowerCase()] ||
           "bg-gray-100 text-gray-600";
         return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${style}`}
-          >
+          <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${style}`}>
             {item.paymentStatus}
           </span>
         );
@@ -108,41 +144,63 @@ const Client = () => {
     },
   ];
 
+  const isClients = activeMainTab === 0;
+  const subtitle = isClients
+    ? `${MAIN_TABS[0]} - ${SUB_TABS[0][activeSubTab]}`
+    : MAIN_TABS[activeMainTab];
+
   return (
-    <div className="h-full">
+    <div className="h-full flex flex-col overflow-hidden">
       <Table
         title="Clients"
-        subtitle="Clients - All Clients"
-        columns={columns}
-        data={tableData}
+        subtitle={subtitle}
+        mainTabs={MAIN_TABS}
+        onMainTabChange={(idx) => { setActiveMainTab(idx); setActiveSubTab(0); }}
+        subTabs={isClients ? SUB_TABS[0] : undefined}
+        onSubTabChange={setActiveSubTab}
+        columns={isClients ? columns : []}
+        data={isClients ? tableData : []}
         rowsPerPage={8}
-        onRowClick={(item) => navigate(`/clients/${item.clientID}`)}
+        clickableColumns={isClients ? ["clientID", "clientName"] : []}
+        onCellClick={isClients ? (item) => navigate(`/clients/${item.clientID}`) : undefined}
         activeRowKey="clientID"
-        mainTabs={["Inquiries", "Project Caliber"]}
-        subTabs={["New Inquiries", "Nurturing Inquiries", "Dropped Inquiries"]}
-        actions={
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-linear-to-r from-[#1E3A8A] to-[#001552] text-white rounded-lg px-5 py-2.5 text-sm font-medium"
-          >
-            <FiPlusCircle />
-            Add Client
-          </button>
+        emptyMessage={
+          isClients ? "No clients found." : "Project Caliber view — coming soon"
         }
-        sortFields={[
+        actions={
+          isClients && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 bg-linear-to-r from-[#1E3A8A] to-[#001552] text-white rounded-lg px-5 py-2.5 text-sm font-medium"
+            >
+              <FiPlusCircle />
+              Add Client
+            </button>
+          )
+        }
+        sortFields={isClients ? [
           { key: "clientName", label: "Client Name" },
           { key: "clientID", label: "Client ID" },
           { key: "budget", label: "Budget" },
           { key: "paymentStatus", label: "Payment Status" },
-        ]}
-        filterFields={[
+        ] : undefined}
+        filterFields={isClients ? [
           {
             key: "paymentStatus",
             label: "Payment Status",
-            options: ["Completed", "Pending", "Failed"],
+            options: ["Completed", "Pending", "Failed", "Cancelled"],
           },
-        ]}
-        exportConfig={{
+        ] : undefined}
+        dateRangeField={isClients ? {
+          key: "joinDate",
+          parse: (value) => {
+            const parts = value?.split(".");
+            if (parts?.length === 3)
+              return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            return null;
+          },
+        } : undefined}
+        exportConfig={isClients ? {
           filename: "clients_export",
           columns: [
             { label: "Sno", key: "sno" },
@@ -150,15 +208,11 @@ const Client = () => {
             { label: "Client Name", key: "clientName" },
             { label: "Client Phone", key: "clientPhone" },
             { label: "Client Email", key: "clientEmail" },
-            {
-              label: "Location",
-              render: (item) =>
-                `${item.location} - ${item.locationSecondary}`,
-            },
+            { label: "Location", render: (item) => `${item.location} - ${item.locationSecondary}` },
             { label: "Budget", key: "budget" },
             { label: "Payment Status", key: "paymentStatus" },
           ],
-        }}
+        } : undefined}
       />
 
       {showForm && (

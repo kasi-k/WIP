@@ -45,7 +45,7 @@ export default function FilterDropdown({
                   onChange={(e) => handleChange(field.key, e.target.value)}
                   className="w-full border border-gray-300 rounded p-1.5 text-sm focus:outline-none focus:border-select-blue"
                 >
-                  <option value="">All {field.label}s</option>
+                  <option value="">All {field.label}</option>
                   {field.options.map((opt) => {
                     const val = typeof opt === "string" ? opt : opt.value;
                     const label = typeof opt === "string" ? opt : opt.label;

@@ -90,12 +90,12 @@ const Login = () => {
             {/* Google Button */}
             <button
               type="button"
-              className="w-full flex items-center justify-center gap-3 bg-white border border-border rounded-full py-3 text-[14px] font-semibold text-textcolor hover:bg-gray-50 transition-all mb-7 shadow-sm"
+              className="w-full flex items-center justify-center gap-1 bg-white border border-x-3 border-y-0 rounded-full py-3 text-[14px] font-semibold text-textcolor hover:bg-gray-50 transition-all mb-7 shadow-sm"
             >
               <img
                 src={Google}
                 alt="Google"
-                className="w-5 h-5 object-contain"
+                className="w-7 h-7 object-contain"
               />
               Continue with Google
             </button>
@@ -130,7 +130,7 @@ const Login = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="name@atelier.com"
-                    className={`box-border w-full bg-white border text-[#334155] text-[14px] rounded-full h-[48px] pl-11 pr-4 focus:outline-none focus:ring-2 transition-all placeholder-[#cbd5e1] ${
+                    className={`box-border w-full border border-x-3 border-y-0 bg-white text-[#334155] text-[14px] rounded-full h-[48px] pl-11 pr-4 focus:outline-none focus:ring-2 transition-all placeholder-[#cbd5e1] ${
                       errors.email
                         ? "border-red-300 focus:ring-red-100"
                         : "border-border focus:border-[#0a1b49] focus:ring-[#0a1b49]/10"
@@ -163,7 +163,7 @@ const Login = () => {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="••••••••"
-                    className={`box-border w-full bg-white border text-[#334155] text-[14px] rounded-full h-[48px] pl-11 pr-12 focus:outline-none focus:ring-2 transition-all placeholder-[#cbd5e1] ${
+                    className={`box-border w-full border border-x-3 border-y-0 bg-white text-[#334155] text-[14px] rounded-full h-[48px] pl-11 pr-12 focus:outline-none focus:ring-2 transition-all placeholder-[#cbd5e1] ${
                       errors.password
                         ? "border-red-300 focus:ring-red-100"
                         : "border-border focus:border-[#0a1b49] focus:ring-[#0a1b49]/10"
@@ -227,17 +227,6 @@ const Login = () => {
                 {loading && <Loader2 className="animate-spin h-5 w-5" />}
                 <span>{loading ? "Signing in..." : "Sign In"}</span>
               </button>
-
-              {/* Footer */}
-              <p className="text-center text-[13.5px] font-medium text-text-muted pt-2">
-                Don't have an account?{" "}
-                <button
-                  onClick={() => navigate("/signup")}
-                  className="text-[#0a1b49] font-bold hover:underline"
-                >
-                  Create an account
-                </button>
-              </p>
             </form>
           </div>
         </div>

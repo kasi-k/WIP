@@ -35,7 +35,6 @@ const Table = ({
   data = [],
   rowsPerPage = 8,
   onRowClick,
-  activeRow,
   activeRowKey = "id",
   emptyMessage = "No records found.",
   sortFields,
@@ -48,6 +47,8 @@ const Table = ({
   defaultSubTab = 0,
   onMainTabChange,
   onSubTabChange,
+  clickableColumns = [],
+  onCellClick,
 }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
@@ -58,6 +59,7 @@ const Table = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [activeMainTab, setActiveMainTab] = useState(defaultMainTab);
   const [activeSubTab, setActiveSubTab] = useState(defaultSubTab);
+  const [selectedRowId, setSelectedRowId] = useState(null);
 
   const handleMainTabClick = (idx) => {
     setActiveMainTab(idx);
@@ -184,7 +186,7 @@ const Table = ({
   ) : null;
 
   return (
-    <div className="h-full w-full min-w-0 flex flex-col p-1.5">
+    <div className="h-full w-full min-w-0 flex flex-col p-1.5 overflow-hidden">
       {activeDropdown === "dateRange" && (
         <div className="fixed inset-0  z-40" />
       )}
@@ -198,8 +200,16 @@ const Table = ({
               {(title || subtitle || actions) && (
                 <div className="flex justify-between items-center mb-1 px-0.5">
                   <span>
-                    {title && <h3 className="text-primary text-3xl font-semibold">{title}</h3>}
-                    {subtitle && <p className="text-text-muted text-xs mt-0.5">{subtitle}</p>}
+                    {title && (
+                      <h3 className="text-primary text-3xl font-semibold">
+                        {title}
+                      </h3>
+                    )}
+                    {subtitle && (
+                      <p className="text-text-muted text-xs mt-0.5">
+                        {subtitle}
+                      </p>
+                    )}
                   </span>
                   {actions}
                 </div>
@@ -216,14 +226,17 @@ const Table = ({
                           onClick={() => handleMainTabClick(idx)}
                           className={`relative cursor-pointer flex items-center h-[42px] ${isActive ? "z-20" : "z-10"} ${idx > 0 ? "-ml-4" : ""}`}
                         >
-                          <div className={`relative flex items-center px-6 h-full rounded-tl-[16px] transition-colors duration-200 z-20 ${
-                            isActive ? "bg-white text-[#001552] font-semibold text-[15px]" : "bg-[#e5e7eb] text-secondary"
-                          }`}>
-                            <span className="relative z-30 tracking-wide">{tab}</span>
+                          <div
+                            className={`relative flex items-center px-6 h-full rounded-t-[16px] transition-colors duration-200 z-20 ${
+                              isActive
+                                ? "bg-white text-[#001552] font-semibold text-[15px]"
+                                : "bg-[#e5e7eb] text-secondary"
+                            }`}
+                          >
+                            <span className="relative z-30 tracking-wide">
+                              {tab}
+                            </span>
                           </div>
-                          <div className={`absolute top-0 -right-[16px] w-[34px] h-full transform skew-x-22 rounded-tr-[12px] transition-colors duration-200 z-10 ${
-                            isActive ? "bg-white" : "bg-[#e5e7eb]"
-                          }`} />
                         </div>
                       );
                     })}
@@ -237,24 +250,34 @@ const Table = ({
           {!mainTabs?.length && (title || subtitle || actions) && (
             <div className="flex justify-between items-center mb-2">
               <span>
-                {title && <h3 className="text-primary text-3xl font-semibold">{title}</h3>}
-                {subtitle && <p className="text-text-muted text-xs mt-0.5">{subtitle}</p>}
+                {title && (
+                  <h3 className="text-primary text-3xl font-semibold">
+                    {title}
+                  </h3>
+                )}
+                {subtitle && (
+                  <p className="text-text-muted text-xs mt-0.5">{subtitle}</p>
+                )}
               </span>
               {actions}
             </div>
           )}
           {/* Sub-tabs row */}
           {subTabs?.length > 0 && (
-            <div className={`flex ${!mainTabs?.length ? "justify-between items-start gap-2" : ""}`}>
+            <div
+              className={`flex ${!mainTabs?.length ? "justify-between items-start gap-2" : ""}`}
+            >
               <div className="overflow-x-auto min-w-0 [&::-webkit-scrollbar]:hidden">
-                <div className="relative z-10 flex bg-white w-max items-center pr-8 ml-2 rounded-bl-[16px] -mt-px">
+                <div className="relative z-10 flex bg-white w-max items-center pr-8 ml-2 rounded-bl-[16px] rounded-br-[16px] rounded-tr-[16px] -mt-px">
                   <div className="flex gap-8 px-6 pt-3 pb-0 relative z-30">
                     {subTabs.map((tab, i) => (
                       <button
                         key={i}
                         onClick={() => handleSubTabClick(i)}
                         className={`pb-3 pt-1 text-[15px] transition-all relative whitespace-nowrap ${
-                          activeSubTab === i ? "text-[#001552] font-semibold" : "text-secondary hover:text-[#001552]"
+                          activeSubTab === i
+                            ? "text-[#001552] font-semibold"
+                            : "text-secondary hover:text-[#001552]"
                         }`}
                       >
                         {tab}
@@ -264,10 +287,11 @@ const Table = ({
                       </button>
                     ))}
                   </div>
-                  <div className="absolute top-0 -right-[22px] w-[50px] h-full bg-white transform skew-x-22 rounded-tr-[16px] rounded-br-[16px] z-10" />
                 </div>
               </div>
-              {!mainTabs?.length && <div className="shrink-0 pt-2">{toolbar}</div>}
+              {!mainTabs?.length && (
+                <div className="shrink-0 pt-2">{toolbar}</div>
+              )}
             </div>
           )}
         </div>
@@ -277,13 +301,20 @@ const Table = ({
           {(title || subtitle || actions) && (
             <div className="flex justify-between items-center mb-2 px-1.5">
               <span>
-                {title && <h3 className="text-primary text-3xl font-semibold">{title}</h3>}
-                {subtitle && <p className="text-text-muted text-xs mt-0.5">{subtitle}</p>}
+                {title && (
+                  <h3 className="text-primary text-3xl font-semibold">
+                    {title}
+                  </h3>
+                )}
+                {subtitle && (
+                  <p className="text-text-muted text-xs mt-0.5">{subtitle}</p>
+                )}
               </span>
               {actions}
             </div>
           )}
-          {children && (typeof children === "function" ? children(toolbar) : children)}
+          {children &&
+            (typeof children === "function" ? children(toolbar) : children)}
         </>
       )}
 
@@ -318,28 +349,54 @@ const Table = ({
               ) : (
                 pageData.map((item, index) => {
                   const rowId = item[activeRowKey] ?? index;
-                  const isSelected = activeRow != null && activeRow === rowId;
+                  const isSelected =
+                    selectedRowId != null && selectedRowId === rowId;
+                  const isClickableRow =
+                    clickableColumns.length > 0 || onRowClick;
                   return (
                     <tr
                       key={index}
-                      onClick={() => onRowClick?.(item)}
-                      className="text-sm transition-all duration-200 cursor-pointer group hover:-translate-y-px"
+                      onClick={() => {
+                        setSelectedRowId(rowId);
+                        if (!clickableColumns.length && onRowClick) {
+                          onRowClick(item);
+                        }
+                      }}
+                      className={`text-sm transition-all duration-200 group hover:-translate-y-px ${isClickableRow ? "cursor-pointer" : ""}`}
                     >
                       {columns.map((col, colIdx) => {
                         const isFirst = colIdx === 0;
                         const isLast = colIdx === columns.length - 1;
-                        
+                        const isClickableCell = clickableColumns.includes(
+                          col.key,
+                        );
+
                         const bgClass = isSelected
                           ? "bg-active-bg shadow-[0_4px_15px_rgba(0,0,0,0.08)]"
                           : "bg-white shadow-[0_2px_10px_rgba(0,0,0,0.03)] group-hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] group-hover:bg-gray-50/50";
-                        
+                        const borderClass = isSelected
+                          ? isFirst
+                            ? "border-l-[3px] border-l-[#1E3A8A] border-t-[1.5px] border-b-[1.5px] border-t-[#1E3A8A]/30 border-b-[#1E3A8A]/30"
+                            : isLast
+                              ? "border-r-[3px] border-r-[#1E3A8A] border-t-[1.5px] border-b-[1.5px] border-t-[#1E3A8A]/30 border-b-[#1E3A8A]/30"
+                              : "border-t-[1.5px] border-b-[1.5px] border-t-[#1E3A8A]/30 border-b-[#1E3A8A]/30"
+                          : "";
+
                         return (
                           <td
                             key={col.key || colIdx}
+                            onClick={(e) => {
+                              if (isClickableCell && onCellClick) {
+                                e.stopPropagation();
+                                setSelectedRowId(rowId);
+                                onCellClick(item);
+                              }
+                            }}
                             className={`py-[9px] px-3 transition-colors
                               ${isFirst ? "rounded-l-2xl pl-5" : ""}
                               ${isLast ? "rounded-r-2xl pr-5" : ""}
-                              ${bgClass}`}
+                              ${bgClass} ${borderClass}
+                              ${isClickableCell ? "cursor-pointer hover:text-[#1E3A8A] hover:underline underline-offset-2" : ""}`}
                           >
                             {col.render
                               ? col.render(item[col.key], item, index)
@@ -355,7 +412,7 @@ const Table = ({
           </table>
         </div>
       </div>
-      
+
       {/* Footer — pinned below the scroll area */}
       <Pagination
         currentPage={safePage}

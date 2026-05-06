@@ -11,6 +11,7 @@ export const ClientTableData=[
     locationSecondary: "Beverly Hills, CA",
     budget: "₹60-70L",
     paymentStatus: "completed",
+    joinDate: "14.03.2024",
   },
   {
     sno: 2,
@@ -22,6 +23,7 @@ export const ClientTableData=[
     locationSecondary: "New York, USA",
     budget: "₹30-40L",
     paymentStatus: "pending",
+    joinDate: "02.05.2024",
   },
   {
     sno: 3,
@@ -33,6 +35,7 @@ export const ClientTableData=[
     locationSecondary: "London, UK",
     budget: "₹80-90L",
     paymentStatus: "completed",
+    joinDate: "18.06.2024",
   },
   {
     sno: 4,
@@ -44,6 +47,7 @@ export const ClientTableData=[
     locationSecondary: "Sydney, Australia",
     budget: "₹50-60L",
     paymentStatus: "failed",
+    joinDate: "07.07.2024",
   },
   {
     sno: 5,
@@ -55,6 +59,7 @@ export const ClientTableData=[
     locationSecondary: "Toronto, Canada",
     budget: "₹45-55L",
     paymentStatus: "pending",
+    joinDate: "23.08.2024",
   },
   {
     sno: 6,
@@ -66,6 +71,7 @@ export const ClientTableData=[
     locationSecondary: "Dubai, UAE",
     budget: "₹1-1.2Cr",
     paymentStatus: "completed",
+    joinDate: "11.09.2024",
   },
   {
     sno: 7,
@@ -77,6 +83,7 @@ export const ClientTableData=[
     locationSecondary: "Berlin, Germany",
     budget: "₹20-30L",
     paymentStatus: "pending",
+    joinDate: "30.09.2024",
   },
   {
     sno: 8,
@@ -88,6 +95,7 @@ export const ClientTableData=[
     locationSecondary: "Texas, USA",
     budget: "₹70-80L",
     paymentStatus: "completed",
+    joinDate: "15.10.2024",
   },
   {
     sno: 9,
@@ -99,6 +107,7 @@ export const ClientTableData=[
     locationSecondary: "Miami, USA",
     budget: "₹90L-1Cr",
     paymentStatus: "failed",
+    joinDate: "04.11.2024",
   },
   {
     sno: 10,
@@ -110,5 +119,6 @@ export const ClientTableData=[
     locationSecondary: "Singapore",
     budget: "₹35-45L",
     paymentStatus: "completed",
+    joinDate: "20.12.2024",
   },
 ];

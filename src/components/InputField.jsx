@@ -30,7 +30,7 @@ const InputField = ({
             name={name}
             value={value}
             onChange={onChange}
-            className={`bg-[#f4f5f7] border border-[#e2e8f0] text-[11px] text-[#1e293b] rounded-md px-3 py-2 w-full focus:outline-none focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] appearance-none ${
+            className={`bg-[#f4f5f7] border border-[#e2e8f0] text-[11px] text-[#1e293b] rounded-md px-3 py-2 w-full focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-300 appearance-none ${
               hasError
                 ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                 : ""
@@ -60,7 +60,7 @@ const InputField = ({
             onChange={onChange}
             rows={rows}
             placeholder={placeholder}
-            className={`bg-[#f4f5f7] border border-[#e2e8f0] text-[11px] text-[#1e293b] rounded-md px-3 py-2 w-full focus:outline-none focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] placeholder-gray-400 resize-none ${
+            className={`bg-[#f4f5f7] border border-[#e2e8f0] text-[11px] text-[#1e293b] rounded-md px-3 py-2 w-full focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-300 placeholder-gray-400 resize-none ${
               hasError
                 ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                 : ""
@@ -74,7 +74,7 @@ const InputField = ({
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className={`bg-[#f4f5f7] border border-[#e2e8f0] text-[11px] text-[#1e293b] rounded-md px-3 py-2 w-full focus:outline-none focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] placeholder-gray-400 ${
+            className={`bg-[#f4f5f7] border border-[#e2e8f0] text-[11px] text-[#1e293b] rounded-md px-3 py-2 w-full focus:outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-300 placeholder-gray-400 ${
               hasError
                 ? "border-red-500 focus:border-red-500 focus:ring-red-500"
                 : ""
